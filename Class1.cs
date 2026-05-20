@@ -1,8 +1,8 @@
-﻿using MelonLoader;
+using MelonLoader;
 using Il2Cpp;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(MISHAAutoChest.AutoChestMod), "AutoChest", "1.0.0", "author")]
+[assembly: MelonInfo(typeof(MISHAAutoChest.AutoChestMod), "AutoChest", "1.1.0", "Pixelincorp")]
 [assembly: MelonGame("", "MISHA")]
 
 namespace MISHAAutoChest
@@ -12,15 +12,24 @@ namespace MISHAAutoChest
         private PlaytimeReward _reward;
         private GlobalKeyHook _keyHook;
         private float _timer = 0f;
+        private float _clickTimer = 0f;
+        private float _nextClickInterval = 0.8f;
 
         public override void OnUpdate()
         {
-            // Автоклик
-            if (_keyHook == null)
-                _keyHook = Object.FindObjectOfType<GlobalKeyHook>();
+            // Автоклик каждые 0.8 сек в среднем (с рандомом от 0.6 до 1.0 сек)
+            _clickTimer += Time.deltaTime;
+            if (_clickTimer >= _nextClickInterval)
+            {
+                _clickTimer = 0f;
+                _nextClickInterval = UnityEngine.Random.Range(0.6f, 1.0f);
 
-            if (_keyHook != null)
-                _keyHook.OnKeyPressed?.Invoke(0);
+                if (_keyHook == null)
+                    _keyHook = UnityEngine.Object.FindObjectOfType<GlobalKeyHook>();
+
+                if (_keyHook != null)
+                    _keyHook.OnKeyPressed?.Invoke(0);
+            }
 
             // Авто сундук
             _timer += Time.deltaTime;
@@ -29,7 +38,7 @@ namespace MISHAAutoChest
 
             if (_reward == null)
             {
-                _reward = Object.FindObjectOfType<PlaytimeReward>();
+                _reward = UnityEngine.Object.FindObjectOfType<PlaytimeReward>();
                 return;
             }
 
